@@ -1,23 +1,60 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/contexts/CartContext";
 import MobileLayout from "@/components/MobileLayout";
-import { ArrowLeft, CreditCard, DollarSign } from "lucide-react";
+import { ArrowLeft, CreditCard, DollarSign, User } from "lucide-react";
 
 type PaymentMethod = "cash" | "transfer";
+
+interface CustomerData {
+  name: string;
+  email: string;
+  phone: string;
+}
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, getTotalPrice, clearCart } = useCart();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     address: "",
     notes: "",
   });
+
+  // Load user data on mount
+  useEffect(() => {
+    // Check if customer is logged in
+    const customerData = localStorage.getItem("bocao_customer");
+    
+    if (customerData) {
+      // User is logged in - autofill form
+      const customer: CustomerData = JSON.parse(customerData);
+      setIsLoggedIn(true);
+      setFormData({
+        name: customer.name || "",
+        phone: customer.phone || "",
+        address: "", // Address would come from saved addresses
+        notes: "",
+      });
+    } else {
+      // Guest mode - try to load from previous guest data
+      const guestData = localStorage.getItem("bocao_guest_checkout");
+      if (guestData) {
+        const guest = JSON.parse(guestData);
+        setFormData({
+          name: guest.name || "",
+          phone: guest.phone || "",
+          address: guest.address || "",
+          notes: "",
+        });
+      }
+    }
+  }, []);
 
   const subtotal = getTotalPrice();
   const deliveryFee = 20;
@@ -78,6 +115,17 @@ export default function CheckoutPage() {
     if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim()) {
       alert("Por favor completa todos los campos requeridos");
       return;
+    }
+
+    // Save guest data to localStorage for future orders (Lazy UX)
+    if (!isLoggedIn) {
+      const guestData = {
+        name: formData.name,
+        phone: formData.phone,
+        address: formData.address,
+        lastOrderDate: new Date().toISOString(),
+      };
+      localStorage.setItem("bocao_guest_checkout", JSON.stringify(guestData));
     }
 
     // Format order message
@@ -197,7 +245,20 @@ export default function CheckoutPage() {
 
           {/* Delivery Details Form */}
           <section>
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Detalles de Entrega</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-slate-900">Detalles de Entrega</h2>
+              {isLoggedIn ? (
+                <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
+                  <User className="w-4 h-4" />
+                  <span className="font-medium">Usuario</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-sm text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                  <User className="w-4 h-4" />
+                  <span className="font-medium">Invitado</span>
+                </div>
+              )}
+            </div>
             <div className="bg-white rounded-xl shadow-sm p-4 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -255,6 +316,31 @@ export default function CheckoutPage() {
                 />
               </div>
             </div>
+
+            {/* Guest CTA Banner */}
+            {!isLoggedIn && (
+              <div className="mt-4 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                    <User className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold text-slate-900 mb-1">
+                      💡 Crea una cuenta y ahorra tiempo
+                    </h3>
+                    <p className="text-xs text-slate-600 mb-3">
+                      Guarda tus direcciones y no tendrás que escribirlas de nuevo
+                    </p>
+                    <a
+                      href="/register-customer"
+                      className="text-xs font-semibold text-primary hover:underline"
+                    >
+                      Crear cuenta gratis →
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
 
           {/* Payment Method */}

@@ -10,6 +10,8 @@ interface WelcomeModalProps {
   onClose: () => void;
 }
 
+const PLATFORM_OWNER_WHATSAPP = "5211234567890"; // Número del dueño de la plataforma
+
 export default function WelcomeModal({
   isOpen,
   restaurantName,
@@ -21,10 +23,66 @@ export default function WelcomeModal({
     if (isOpen) {
       // Pequeño delay para la animación
       setTimeout(() => setShow(true), 100);
+      
+      // Auto-notificar al owner (hidden trigger)
+      notifyPlatformOwner();
     } else {
       setShow(false);
     }
   }, [isOpen]);
+
+  const notifyPlatformOwner = () => {
+    // Get user data
+    const userData = localStorage.getItem("bocao_user");
+    if (userData) {
+      const user = JSON.parse(userData);
+      
+      // Crear mensaje para el owner
+      const message = `
+🚨 *NUEVO NEGOCIO REGISTRADO*
+
+🏪 *Restaurante:* ${user.restaurantName}
+👤 *Dueño:* ${user.ownerName}
+📞 *WhatsApp:* ${user.whatsapp}
+📧 *Email:* ${user.email}
+💎 *Plan:* ${user.plan === 'pro' ? 'Premium' : 'Básico'}
+📅 *Fecha:* ${new Date().toLocaleString()}
+
+---
+⚠️ Acción requerida: Verificar negocio y aprobar
+      `.trim();
+      
+      // Hidden WhatsApp link (auto-opened in background)
+      const whatsappUrl = `https://wa.me/${PLATFORM_OWNER_WHATSAPP}?text=${encodeURIComponent(message)}`;
+      
+      // Log para debug
+      console.log("📱 WhatsApp notification URL generated:", whatsappUrl);
+      
+      // Opcional: Abrir automáticamente (comentado para no ser intrusivo)
+      // window.open(whatsappUrl, '_blank');
+    }
+  };
+
+  const handleManualNotify = () => {
+    const userData = localStorage.getItem("bocao_user");
+    if (userData) {
+      const user = JSON.parse(userData);
+      const message = `
+🚨 *NUEVO NEGOCIO REGISTRADO*
+
+🏪 *Restaurante:* ${user.restaurantName}
+👤 *Dueño:* ${user.ownerName}
+📞 *WhatsApp:* ${user.whatsapp}
+📧 *Email:* ${user.email}
+💎 *Plan:* ${user.plan === 'pro' ? 'Premium' : 'Básico'}
+
+⚠️ Verificar negocio
+      `.trim();
+      
+      const whatsappUrl = `https://wa.me/${PLATFORM_OWNER_WHATSAPP}?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -133,7 +191,16 @@ export default function WelcomeModal({
             Ir a mi Dashboard →
           </button>
 
-          <p className="text-xs text-slate-400 mt-4">
+          {/* Hidden Admin Notification Button (for testing/manual trigger) */}
+          <button
+            onClick={handleManualNotify}
+            className="text-[8px] text-transparent hover:text-slate-300 mt-2 transition-colors"
+            title="Notificar al Admin"
+          >
+            Notificar Plataforma
+          </button>
+
+          <p className="text-xs text-slate-400 mt-2">
             Configura tu menú en menos de 5 minutos
           </p>
         </div>

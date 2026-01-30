@@ -74,6 +74,34 @@ export default function RegisterPage() {
     localStorage.setItem(`bocao_user_${userData.id}`, JSON.stringify(userData));
     localStorage.setItem("bocao_user", JSON.stringify(userData)); // Sesión activa
     
+    // ========== ADMIN ALERT ==========
+    // Console log para el admin
+    console.log(`
+╔════════════════════════════════════════════════════════════╗
+║              🚨 ADMIN ALERT - NEW BUSINESS REGISTERED      ║
+╠════════════════════════════════════════════════════════════╣
+║  Business Name: ${userData.restaurantName}
+║  Owner: ${userData.ownerName}
+║  Phone: ${userData.whatsapp}
+║  Email: ${userData.email}
+║  Plan: ${userData.plan.toUpperCase()}
+║  Registered: ${new Date().toLocaleString()}
+╚════════════════════════════════════════════════════════════╝
+    `);
+    
+    // Guardar en lista de negocios pendientes para el admin
+    const pendingBusinesses = JSON.parse(localStorage.getItem("bocao_admin_pending") || "[]");
+    pendingBusinesses.push({
+      ...userData,
+      status: "pending", // pending, active, suspended
+      notificationSent: false,
+    });
+    localStorage.setItem("bocao_admin_pending", JSON.stringify(pendingBusinesses));
+    
+    // Incrementar contador de alertas del admin
+    const adminAlerts = parseInt(localStorage.getItem("bocao_admin_alerts") || "0");
+    localStorage.setItem("bocao_admin_alerts", (adminAlerts + 1).toString());
+    
     // Mostrar modal de bienvenida
     setShowWelcomeModal(true);
   };

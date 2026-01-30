@@ -140,7 +140,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/50 z-50 transition-opacity ${
+        className={`fixed inset-0 bg-black/50 z-[55] transition-opacity ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
@@ -148,7 +148,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
 
       {/* Modal */}
       <div
-        className={`fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col transition-transform duration-300 ease-out ${
+        className={`fixed bottom-0 left-0 right-0 z-[60] bg-white rounded-t-3xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col transition-transform duration-300 ease-out ${
           isOpen ? "translate-y-0" : "translate-y-full"
         } md:bottom-auto md:top-1/2 md:left-1/2 md:right-auto md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-2xl md:max-w-lg md:w-full md:max-h-[85vh]`}
         onClick={(e) => e.stopPropagation()}
@@ -170,7 +170,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-4 py-6">
+        <div className="flex-1 overflow-y-auto px-4 py-6 pb-8">
           {/* Product Info */}
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-slate-900 mb-2">{product.name}</h2>
@@ -276,7 +276,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-200 p-4 bg-white">
+        <div className="border-t border-gray-200 p-4 pb-6 bg-white sticky bottom-0 z-10 shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
           <div className="flex items-center justify-between mb-4">
             <span className="text-lg font-semibold text-slate-900">Cantidad</span>
             <div className="flex items-center gap-4">

@@ -1,17 +1,32 @@
 "use client";
 
 import { Save } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
-    restaurantName: "Burger House",
-    phone: "+52 123 456 7890",
-    address: "Calle Principal #123, Ciudad",
+    restaurantName: "",
+    phone: "",
+    address: "",
     deliveryFee: "20",
     minOrder: "50",
     isOpen: true,
   });
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("bocao_user");
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      setSettings({
+        restaurantName: userData.restaurantName || "",
+        phone: userData.phone || "",
+        address: userData.address || "",
+        deliveryFee: userData.deliveryFee || "20",
+        minOrder: userData.minOrder || "50",
+        isOpen: userData.isOpen ?? true,
+      });
+    }
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -24,7 +39,16 @@ export default function SettingsPage() {
   };
 
   const handleSave = () => {
-    alert("Configuración guardada (funcionalidad mock)");
+    const storedUser = localStorage.getItem("bocao_user");
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      const updatedUser = { ...userData, ...settings };
+      localStorage.setItem("bocao_user", JSON.stringify(updatedUser));
+      if (userData.id) {
+        localStorage.setItem(`bocao_user_${userData.id}`, JSON.stringify(updatedUser));
+      }
+      alert("✅ Configuración guardada exitosamente");
+    }
   };
 
   return (

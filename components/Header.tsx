@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, KeyboardEvent } from "react";
+import { useState, useEffect, KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,7 +11,16 @@ export default function Header() {
   const router = useRouter();
   const { getTotalItems } = useCart();
   const [searchQuery, setSearchQuery] = useState("");
+  const [customerName, setCustomerName] = useState<string | null>(null);
   const cartItemsCount = getTotalItems();
+
+  useEffect(() => {
+    const customerData = localStorage.getItem("bocao_customer");
+    if (customerData) {
+      const customer = JSON.parse(customerData);
+      setCustomerName(customer.name);
+    }
+  }, []);
 
   const handleSearchKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchQuery.trim()) {
@@ -42,12 +51,12 @@ export default function Header() {
           {/* Location Selector */}
           <button
             onClick={handleLocationClick}
-            className="flex items-center gap-1 text-sm font-medium text-slate-900 min-w-0 flex-shrink hover:opacity-80 transition-opacity"
+            className="flex items-center gap-1 text-sm font-medium text-slate-600 min-w-0 flex-shrink hover:text-primary transition-colors"
           >
             <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
-            <span className="truncate">Casa - Calle 10...</span>
+            <span className="truncate">Elige tu ubicación</span>
             <svg
-              className="w-4 h-4 text-slate-500 flex-shrink-0"
+              className="w-4 h-4 text-slate-400 flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -87,12 +96,30 @@ export default function Header() {
                 </span>
               )}
             </Link>
-            <Link
-              href="/profile"
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <User className="w-5 h-5 text-slate-700" />
-            </Link>
+            
+            {/* User Profile */}
+            {customerName ? (
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-primary to-orange-600 rounded-full flex items-center justify-center">
+                  <span className="text-sm font-bold text-white">
+                    {customerName.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <span className="text-sm font-medium text-slate-700 hidden sm:block max-w-[100px] truncate">
+                  {customerName.split(' ')[0]}
+                </span>
+              </Link>
+            ) : (
+              <Link
+                href="/profile"
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <User className="w-5 h-5 text-slate-700" />
+              </Link>
+            )}
           </div>
         </div>
       </div>
