@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bocao - Fix New User</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f9fafb;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #F97316;
+      margin-top: 0;
+    }
+    button {
+      background: #F97316;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: #ea580c;
+    }
+    .info {
+      background: #fef3c7;
+      border: 2px solid #fbbf24;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+    .success {
+      background: #d1fae5;
+      border: 2px solid #10b981;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px 0;
+      display: none;
+    }
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🔧 Bocao - Forzar Usuario Nuevo</h1>
+    
+    <div class="info">
+      <strong>⚠️ Problema:</strong> El dashboard muestra datos de Burger House en lugar del asistente de bienvenida.
+    </div>
+
+    <button onclick="fixNewUser()">✓ Forzar Dashboard Vacío (Usuario Nuevo)</button>
+    <button onclick="showWithData()">👁️ Mostrar con Datos Mock (Testing)</button>
+    <button onclick="showDebug()">🔍 Ver Estado Actual</button>
+    <button onclick="clearAll()">🗑️ Limpiar Todo y Reiniciar</button>
+
+    <div id="success" class="success"></div>
+    <div id="debug"></div>
+  </div>
+
+  <script>
+    function fixNewUser() {
+      const user = JSON.parse(localStorage.getItem("bocao_user") || "{}");
+      
+      if (!user.email) {
+        alert("❌ No hay usuario logueado. Por favor registrate primero.");
+        window.location.href = "/register";
+        return;
+      }
+
+      // Forzar isNewUser a true
+      user.isNewUser = true;
+      
+      // Guardar
+      localStorage.setItem("bocao_user", JSON.stringify(user));
+      
+      // También actualizar en la clave específica si existe
+      if (user.id) {
+        localStorage.setItem(`bocao_user_${user.id}`, JSON.stringify(user));
+      }
+
+      // Mostrar éxito
+      document.getElementById("success").innerHTML = `
+        <strong>✅ ¡Éxito!</strong><br>
+        El usuario <strong>${user.restaurantName || user.email}</strong> ahora está configurado como nuevo.<br>
+        <strong>Redirigiendo al dashboard...</strong>
+      `;
+      document.getElementById("success").style.display = "block";
+
+      // Redirigir
+      setTimeout(() => {
+        window.location.href = "/dashboard/orders";
+      }, 2000);
+    }
+
+    function showWithData() {
+      const user = JSON.parse(localStorage.getItem("bocao_user") || "{}");
+      
+      if (!user.email) {
+        alert("❌ No hay usuario logueado.");
+        return;
+      }
+
+      user.isNewUser = false;
+      localStorage.setItem("bocao_user", JSON.stringify(user));
+      
+      if (user.id) {
+        localStorage.setItem(`bocao_user_${user.id}`, JSON.stringify(user));
+      }
+
+      document.getElementById("success").innerHTML = `
+        <strong>✅ Modo Demo Activado</strong><br>
+        Ahora verás datos de ejemplo (Burger House).<br>
+        <strong>Redirigiendo...</strong>
+      `;
+      document.getElementById("success").style.display = "block";
+
+      setTimeout(() => {
+        window.location.href = "/dashboard/menu";
+      }, 2000);
+    }
+
+    function showDebug() {
+      const user = JSON.parse(localStorage.getItem("bocao_user") || "null");
+      
+      let html = "<h3>🔍 Estado Actual:</h3>";
+      
+      if (!user) {
+        html += "<p><strong>❌ No hay sesión activa</strong></p>";
+      } else {
+        html += `<pre>${JSON.stringify(user, null, 2)}</pre>`;
+        html += `<p><strong>¿Es nuevo usuario?</strong> ${user.isNewUser !== false ? "SÍ ✅" : "NO ❌"}</p>`;
+        html += `<p><strong>¿Debería ver onboarding?</strong> ${user.isNewUser !== false ? "SÍ ✅" : "NO ❌"}</p>`;
+      }
+
+      // Contar usuarios
+      let count = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith("bocao_user_")) count++;
+      }
+      html += `<p><strong>Usuarios registrados:</strong> ${count}</p>`;
+
+      document.getElementById("debug").innerHTML = html;
+    }
+
+    function clearAll() {
+      if (confirm("¿Seguro que quieres eliminar TODOS los datos y empezar de cero?")) {
+        localStorage.clear();
+        alert("✅ Datos eliminados. Redirigiendo al registro...");
+        window.location.href = "/register";
+      }
+    }
+
+    // Auto-mostrar debug al cargar
+    window.onload = () => {
+      showDebug();
+    };
+  </script>
+</body>
+</html>
+
+
