@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, AlertCircle } from "lucide-react";
+import adminEmails from "@/data/admins.json";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -49,13 +50,20 @@ export default function LoginPage() {
     }
     
     // Validar credenciales
+    const normalizedEmail = formData.email.trim().toLowerCase();
     const user = registeredUsers.find(
-      (u) => u.email === formData.email && u.password === formData.password
+      (u) => u.email === normalizedEmail && u.password === formData.password
     );
     
     if (user) {
       // Login exitoso - guardar sesión activa
-      localStorage.setItem("bocao_user", JSON.stringify(user));
+      const isAdminEmail = adminEmails.includes(normalizedEmail);
+      const updatedUser = {
+        ...user,
+        email: normalizedEmail,
+        role: isAdminEmail ? "ADMIN" : user.role || "USER",
+      };
+      localStorage.setItem("bocao_user", JSON.stringify(updatedUser));
       router.push("/dashboard/orders");
     } else {
       // Credenciales incorrectas

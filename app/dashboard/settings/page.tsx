@@ -6,10 +6,11 @@ import { useState, useEffect } from "react";
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
     restaurantName: "",
+    ownerName: "",
     phone: "",
     address: "",
-    deliveryFee: "20",
-    minOrder: "50",
+    deliveryFee: "",
+    minOrder: "",
     isOpen: true,
   });
 
@@ -19,10 +20,11 @@ export default function SettingsPage() {
       const userData = JSON.parse(storedUser);
       setSettings({
         restaurantName: userData.restaurantName || "",
-        phone: userData.phone || "",
+        ownerName: userData.ownerName || "",
+        phone: userData.whatsapp || userData.phone || "",
         address: userData.address || "",
-        deliveryFee: userData.deliveryFee || "20",
-        minOrder: userData.minOrder || "50",
+        deliveryFee: userData.deliveryFee ?? "",
+        minOrder: userData.minOrder ?? "",
         isOpen: userData.isOpen ?? true,
       });
     }
@@ -83,6 +85,18 @@ export default function SettingsPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
+                Nombre del Dueño
+              </label>
+              <input
+                type="text"
+                name="ownerName"
+                value={settings.ownerName}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary text-slate-900"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Teléfono
               </label>
               <input
@@ -123,6 +137,7 @@ export default function SettingsPage() {
                 name="deliveryFee"
                 value={settings.deliveryFee}
                 onChange={handleInputChange}
+                placeholder="0"
                 className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary text-slate-900"
               />
             </div>
@@ -135,6 +150,7 @@ export default function SettingsPage() {
                 name="minOrder"
                 value={settings.minOrder}
                 onChange={handleInputChange}
+                placeholder="0"
                 className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary text-slate-900"
               />
             </div>

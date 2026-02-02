@@ -151,7 +151,7 @@ export default function WelcomeModal({
                   Prueba Premium Activada
                 </p>
                 <p className="text-xs text-slate-600">
-                  7 días gratis con todas las funciones
+                  15 días gratis con todas las funciones
                 </p>
               </div>
             </div>
@@ -188,7 +188,7 @@ export default function WelcomeModal({
             onClick={onClose}
             className="w-full bg-gradient-to-r from-primary to-orange-600 hover:from-orange-600 hover:to-primary text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 duration-200"
           >
-            Ir a mi Dashboard →
+            Entrar a mi Restaurante →
           </button>
 
           {/* Hidden Admin Notification Button (for testing/manual trigger) */}
@@ -201,7 +201,7 @@ export default function WelcomeModal({
           </button>
 
           <p className="text-xs text-slate-400 mt-2">
-            Configura tu menú en menos de 5 minutos
+            Configura tu menú rápido o escríbenos para ayudarte.
           </p>
         </div>
       </div>

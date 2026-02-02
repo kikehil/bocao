@@ -1,11 +1,37 @@
 "use client";
 
 import { Download, Share2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 
 export default function QRCodePage() {
-  const [restaurantSlug] = useState("burger-house");
-  const menuUrl = `https://bocao.app/${restaurantSlug}`;
+  const [restaurantSlug, setRestaurantSlug] = useState("mi-restaurante");
+  const [restaurantName, setRestaurantName] = useState("Mi Menú");
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("bocao_user");
+    if (!storedUser) return;
+    const userData = JSON.parse(storedUser);
+    const slug =
+      userData.slug ||
+      (userData.restaurantName ? slugify(userData.restaurantName) : null) ||
+      userData.id ||
+      "mi-restaurante";
+    setRestaurantSlug(slug);
+    setRestaurantName(userData.restaurantName || "Mi Menú");
+  }, []);
+
+  const menuUrl = useMemo(
+    () => `https://bocao.app/${restaurantSlug}`,
+    [restaurantSlug]
+  );
 
   // Mock QR Code - In production, you would generate this using a library like qrcode.react
   const qrCodeImage = `data:image/svg+xml,${encodeURIComponent(`
@@ -39,7 +65,7 @@ export default function QRCodePage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "Mi Menú - Burger House",
+          title: `Mi Menú - ${restaurantName}`,
           text: "Escanea este código QR para ver nuestro menú",
           url: menuUrl,
         });
@@ -127,6 +153,9 @@ export default function QRCodePage() {
     </div>
   );
 }
+
+
+
 
 
 

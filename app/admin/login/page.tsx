@@ -41,12 +41,12 @@ export default function AdminLoginPage() {
         // Login exitoso
         const adminSession = {
           username: formData.username,
-          role: "super_admin",
+          role: "ADMIN",
           loginTime: new Date().toISOString(),
         };
         
         localStorage.setItem("bocao_admin_session", JSON.stringify(adminSession));
-        router.push("/admin/overview");
+        router.push("/admin");
       } else {
         // Credenciales incorrectas
         setError("Credenciales incorrectas. Acceso denegado.");
@@ -180,4 +180,7 @@ export default function AdminLoginPage() {
     </div>
   );
 }
+
+
+
 

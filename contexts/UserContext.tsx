@@ -7,7 +7,8 @@ interface UserData {
   ownerName: string;
   whatsapp: string;
   email: string;
-  plan: "basic" | "pro";
+  role?: "ADMIN" | "USER";
+  plan: "digital" | "impulso";
   isNewUser: boolean;
   createdAt?: string;
 }
@@ -85,5 +86,8 @@ export function useUser() {
   }
   return context;
 }
+
+
+
 
 

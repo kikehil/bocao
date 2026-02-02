@@ -33,7 +33,7 @@ export default function StickyCTA() {
             href="/register"
             className="block w-full bg-primary hover:bg-orange-600 text-white text-center py-4 px-6 rounded-2xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
           >
-            Comenzar Prueba Gratis
+            Quiero mi propia App
             <ArrowRight className="w-5 h-5" />
           </Link>
         </div>

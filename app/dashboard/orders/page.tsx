@@ -1,6 +1,7 @@
 "use client";
 
 import { ShoppingBag } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 const columns = [
   {
@@ -26,9 +27,50 @@ const columns = [
   },
 ];
 
+type Order = {
+  id: string;
+  status: "new" | "preparing" | "ready";
+};
+
 export default function LiveOrdersPage() {
-  // Mock empty orders for now
-  const orders: any[] = [];
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("bocao_user");
+    if (!storedUser) {
+      setOrders([]);
+      return;
+    }
+    const userData = JSON.parse(storedUser);
+    const currentRestaurantId = userData.id;
+    if (!currentRestaurantId) {
+      setOrders([]);
+      return;
+    }
+
+    const storedOrders = localStorage.getItem(
+      `bocao_orders_${currentRestaurantId}`
+    );
+    if (storedOrders) {
+      try {
+        setOrders(JSON.parse(storedOrders));
+      } catch (error) {
+        console.error("Error parsing stored orders:", error);
+        setOrders([]);
+      }
+    } else {
+      setOrders([]);
+    }
+  }, []);
+
+  const counts = useMemo(() => {
+    return {
+      total: orders.length,
+      new: orders.filter((o) => o.status === "new").length,
+      preparing: orders.filter((o) => o.status === "preparing").length,
+      ready: orders.filter((o) => o.status === "ready").length,
+    };
+  }, [orders]);
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -91,24 +133,35 @@ export default function LiveOrdersPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <div className="text-sm text-slate-600">Total Órdenes</div>
-          <div className="text-2xl font-bold text-slate-900 mt-1">0</div>
+          <div className="text-2xl font-bold text-slate-900 mt-1">
+            {counts.total}
+          </div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <div className="text-sm text-slate-600">Nuevas</div>
-          <div className="text-2xl font-bold text-yellow-600 mt-1">0</div>
+          <div className="text-2xl font-bold text-yellow-600 mt-1">
+            {counts.new}
+          </div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <div className="text-sm text-slate-600">Preparando</div>
-          <div className="text-2xl font-bold text-blue-600 mt-1">0</div>
+          <div className="text-2xl font-bold text-blue-600 mt-1">
+            {counts.preparing}
+          </div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <div className="text-sm text-slate-600">Completadas</div>
-          <div className="text-2xl font-bold text-green-600 mt-1">0</div>
+          <div className="text-2xl font-bold text-green-600 mt-1">
+            {counts.ready}
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
+
+
 
 
 

@@ -2,9 +2,10 @@
 
 import Navbar from "@/components/negocios/Navbar";
 import HeroSection from "@/components/negocios/HeroSection";
-import StatsGrid from "@/components/negocios/StatsGrid";
-import EcosystemSection from "@/components/negocios/EcosystemSection";
+import ChaosVsOrderSection from "@/components/negocios/ChaosVsOrderSection";
+import OnboardingSection from "@/components/negocios/OnboardingSection";
 import PricingSection from "@/components/negocios/PricingSection";
+import FinalCTASection from "@/components/negocios/FinalCTASection";
 import Footer from "@/components/negocios/Footer";
 import StickyCTA from "@/components/negocios/StickyCTA";
 
@@ -13,9 +14,10 @@ export default function NegociosPage() {
     <div className="min-h-screen bg-white">
       <Navbar />
       <HeroSection />
-      <StatsGrid />
-      <EcosystemSection />
+      <ChaosVsOrderSection />
+      <OnboardingSection />
       <PricingSection />
+      <FinalCTASection />
       <Footer />
       <StickyCTA />
     </div>

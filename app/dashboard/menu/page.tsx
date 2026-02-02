@@ -1,23 +1,47 @@
 "use client";
 
-import { restaurants } from "@/data/restaurants";
-import { Plus, Edit2, Trash2, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { Plus, Edit2, Trash2, Eye, EyeOff, Utensils } from "lucide-react";
+import { useEffect, useState } from "react";
 
-// Get products from first restaurant (Burger House)
-const restaurant = restaurants.find((r) => r.slug === "burger-house");
+type MenuProduct = {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  category: string;
+  status: "active" | "inactive";
+};
 
 export default function MenuEditorPage() {
-  const [products, setProducts] = useState(() => {
-    if (!restaurant?.menu) return [];
-    return restaurant.menu.categories.flatMap((category) =>
-      category.products.map((product) => ({
-        ...product,
-        category: category.name,
-        status: "active" as "active" | "inactive",
-      }))
-    );
-  });
+  const [products, setProducts] = useState<MenuProduct[]>([]);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("bocao_user");
+    if (!storedUser) {
+      setProducts([]);
+      return;
+    }
+
+    const userData = JSON.parse(storedUser);
+    const currentRestaurantId = userData.id || null;
+    if (!currentRestaurantId) {
+      setProducts([]);
+      return;
+    }
+
+    const storedMenu = localStorage.getItem(`bocao_menu_${currentRestaurantId}`);
+    if (storedMenu) {
+      try {
+        setProducts(JSON.parse(storedMenu));
+      } catch (error) {
+        console.error("Error parsing stored menu:", error);
+        setProducts([]);
+      }
+    } else {
+      setProducts([]);
+    }
+  }, []);
 
   const toggleProductStatus = (id: number) => {
     setProducts((prev) =>
@@ -48,41 +72,50 @@ export default function MenuEditorPage() {
         </button>
       </div>
 
-      {/* Products Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Imagen
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Nombre
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Precio
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Categoría
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Estado
-                </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {products.length === 0 ? (
+      {products.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-10 text-center">
+          <div className="mx-auto w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+            <Utensils className="w-10 h-10 text-slate-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">
+            Tu menú está vacío.
+          </h3>
+          <p className="text-slate-500 mb-6">
+            Agrega tu primer platillo para empezar a vender.
+          </p>
+          <button className="inline-flex items-center gap-2 bg-primary hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+            <Plus className="w-5 h-5" />
+            Agregar Producto
+          </button>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                    No hay productos en el menú
-                  </td>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Imagen
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Nombre
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Precio
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Categoría
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Estado
+                  </th>
+                  <th className="px-6 py-4 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Acciones
+                  </th>
                 </tr>
-              ) : (
-                products.map((product) => (
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {products.map((product) => (
                   <tr
                     key={product.id}
                     className={`hover:bg-gray-50 transition-colors ${
@@ -155,12 +188,12 @@ export default function MenuEditorPage() {
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
@@ -186,6 +219,9 @@ export default function MenuEditorPage() {
     </div>
   );
 }
+
+
+
 
 
 

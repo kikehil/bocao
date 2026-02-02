@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Check } from "lucide-react";
 import WelcomeModal from "@/components/WelcomeModal";
+import adminEmails from "@/data/admins.json";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function RegisterPage() {
     whatsapp: "",
     email: "",
     password: "",
-    plan: "basic",
+    plan: "digital",
   });
 
   // Modal state
@@ -27,8 +28,12 @@ export default function RegisterPage() {
   // Get plan from URL query param
   useEffect(() => {
     const planParam = searchParams.get("plan");
-    if (planParam === "pro" || planParam === "basic") {
+    if (planParam === "impulso" || planParam === "digital") {
       setFormData((prev) => ({ ...prev, plan: planParam }));
+      return;
+    }
+    if (planParam === "pilot") {
+      setFormData((prev) => ({ ...prev, plan: "digital" }));
     }
   }, [searchParams]);
 
@@ -58,13 +63,16 @@ export default function RegisterPage() {
     }
     
     // Guardar datos del usuario en localStorage
+    const normalizedEmail = formData.email.trim().toLowerCase();
+    const isAdminEmail = adminEmails.includes(normalizedEmail);
     const userData = {
       restaurantName: formData.restaurantName,
       ownerName: formData.ownerName,
       whatsapp: formData.whatsapp,
-      email: formData.email,
+      email: normalizedEmail,
       password: formData.password, // En producción NUNCA guardes passwords en plain text
-      plan: formData.plan as "basic" | "pro",
+      plan: formData.plan as "digital" | "impulso",
+      role: isAdminEmail ? "ADMIN" : "USER",
       isNewUser: true,
       createdAt: new Date().toISOString(),
       id: Date.now().toString(), // ID único
@@ -249,14 +257,19 @@ export default function RegisterPage() {
 
             {/* Plan Selection */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-3">
-                Selecciona tu Plan
-              </label>
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-sm font-medium text-slate-700">
+                  Selecciona tu Plan
+                </label>
+                <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+                  Tus primeros 15 días son GRATIS
+                </span>
+              </div>
               <div className="space-y-3">
-                {/* Plan Básico */}
+                {/* Socio Digital */}
                 <label
                   className={`flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                    formData.plan === "basic"
+                    formData.plan === "digital"
                       ? "border-primary bg-primary/5"
                       : "border-gray-200 hover:border-gray-300"
                   }`}
@@ -264,30 +277,33 @@ export default function RegisterPage() {
                   <input
                     type="radio"
                     name="plan"
-                    value="basic"
-                    checked={formData.plan === "basic"}
+                    value="digital"
+                    checked={formData.plan === "digital"}
                     onChange={handleInputChange}
                     className="mt-1 w-4 h-4 text-primary focus:ring-primary"
                   />
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <span className="font-semibold text-slate-900">
-                        Plan Básico
+                        Socio Digital
                       </span>
                       <span className="text-lg font-bold text-slate-900">
-                        $199<span className="text-sm font-normal text-slate-500">/mes</span>
+                        $499
+                        <span className="text-sm font-normal text-slate-500">
+                          /mes después de la prueba
+                        </span>
                       </span>
                     </div>
                     <p className="text-xs text-slate-600 mt-1">
-                      Perfecto para empezar
+                      Menú y panel listos para recibir pedidos.
                     </p>
                   </div>
                 </label>
 
-                {/* Plan Pro */}
+                {/* Socio Impulso */}
                 <label
                   className={`flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                    formData.plan === "pro"
+                    formData.plan === "impulso"
                       ? "border-primary bg-primary/5"
                       : "border-gray-200 hover:border-gray-300"
                   }`}
@@ -295,8 +311,8 @@ export default function RegisterPage() {
                   <input
                     type="radio"
                     name="plan"
-                    value="pro"
-                    checked={formData.plan === "pro"}
+                    value="impulso"
+                    checked={formData.plan === "impulso"}
                     onChange={handleInputChange}
                     className="mt-1 w-4 h-4 text-primary focus:ring-primary"
                   />
@@ -304,22 +320,37 @@ export default function RegisterPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-slate-900">
-                          Plan Pro
+                          Socio Impulso
                         </span>
                         <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full">
-                          Más Popular
+                          Para vender más
                         </span>
                       </div>
                       <span className="text-lg font-bold text-primary">
-                        $499<span className="text-sm font-normal text-slate-500">/mes</span>
+                        $899
+                        <span className="text-sm font-normal text-slate-500">
+                          /mes después de la prueba
+                        </span>
                       </span>
                     </div>
                     <p className="text-xs text-slate-600 mt-1">
-                      Para restaurantes en crecimiento
+                      Prioridad en visibilidad y marketing.
                     </p>
                   </div>
                 </label>
               </div>
+            </div>
+
+            {/* Trial Summary */}
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm text-emerald-900">
+              <p className="font-semibold">Total a pagar hoy: $0.00 MXN</p>
+              <p className="text-emerald-700">
+                Próximo pago:{" "}
+                {new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toLocaleDateString(
+                  "es-MX",
+                  { day: "2-digit", month: "long", year: "numeric" }
+                )}
+              </p>
             </div>
 
             {/* Submit Button */}
@@ -327,7 +358,7 @@ export default function RegisterPage() {
               type="submit"
               className="w-full bg-primary hover:bg-orange-600 text-white font-semibold py-4 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
             >
-              Crear Cuenta y Continuar
+              Comenzar mi Prueba Gratis
               <ArrowRight className="w-5 h-5" />
             </button>
 
